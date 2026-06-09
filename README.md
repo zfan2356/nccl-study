@@ -99,21 +99,40 @@ Phase 6 (DeepEP)
 | 5 | Multi-node with InfiniBand / GPUDirect RDMA |
 | 6 | Multi-node NVLink + InfiniBand (e.g., H800 cluster) |
 
+## Quick Start
+
+```bash
+# Clone with submodules
+git clone --recurse-submodules https://github.com/zfan2356/nccl-study.git
+cd nccl-study
+
+# Build everything and register Python paths (one-time setup)
+bash scripts/prepare_env.sh
+
+# Run multi-process ring buffer P2P experiment
+torchrun --nproc_per_node=2 primitives/l20/python/run_ring_buffer_p2p.py
+```
+
 ## Directory Structure
 
 ```
 nccl-study/
+├── launcher/               # Public multi-process framework
+│   ├── src/ipc_utils.cu    #   CUDA IPC pybind11 utilities
+│   └── python/             #   Launcher & IPC handle exchange
+├── scripts/
+│   └── prepare_env.sh      # One-time env setup (build + register paths)
 ├── interconnect/
-│   └── l20/            # Phase 1: raw hardware experiments
+│   └── l20/                # Phase 1: raw hardware experiments
 ├── primitives/
-│   └── l20/            # Phase 2: communication primitives
+│   └── l20/                # Phase 2: communication primitives
 ├── collectives/
-│   └── l20/            # Phase 3: collective ops (TODO)
-├── nvshmem/            # Phase 4: PGAS model (TODO, hardware dependent)
-├── gin/                # Phase 5: GPU-initiated networking (TODO)
-├── deepep/             # Phase 6: expert parallelism (TODO)
+│   └── l20/                # Phase 3: collective ops (TODO)
+├── nvshmem/                # Phase 4: PGAS model (TODO, hardware dependent)
+├── gin/                    # Phase 5: GPU-initiated networking (TODO)
+├── deepep/                 # Phase 6: expert parallelism (TODO)
 └── third-party/
-    └── nccl/           # NCCL source (submodule)
+    └── nccl/               # NCCL source (submodule)
 ```
 
 ## Third-Party Dependencies

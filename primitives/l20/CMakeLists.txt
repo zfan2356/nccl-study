@@ -24,3 +24,12 @@ function(add_l20_cuda_experiment target source)
 endfunction()
 
 add_l20_cuda_experiment(ring_buffer_p2p_2node src/ring_buffer_p2p_2node.cu)
+
+# pybind11 kernel modules
+find_package(pybind11 QUIET)
+if(pybind11_FOUND)
+  pybind11_add_module(ring_buffer_p2p_ipc src/ring_buffer_p2p_2node_ipc.cu)
+  target_include_directories(ring_buffer_p2p_ipc PRIVATE
+    ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}
+  )
+endif()

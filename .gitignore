@@ -1,2 +1,8 @@
 /build/
 /.claude/
+/.clangd
+/.vscode/
+/.cache/
+/compile_commands.json
+__pycache__/
+*.pyc
