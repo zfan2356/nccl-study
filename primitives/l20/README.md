@@ -64,7 +64,7 @@ For operations without reduce (AllGather, Broadcast, All-to-All): sender writes 
 
 ## Running
 
-### `ring_buffer_p2p_2node`
+### `ring_buffer_p2p_2node` (single process, 2 GPUs)
 
 ```bash
 ./build/primitives_l20/ring_buffer_p2p_2node [slot_MiB] [num_slots] [total_MiB]
@@ -75,3 +75,19 @@ Example:
 ```bash
 ./build/primitives_l20/ring_buffer_p2p_2node 4 4 256
 ```
+
+### `ring_buffer_p2p` multi-process (legacy IPC)
+
+```bash
+torchrun --nproc_per_node=2 primitives/l20/python/run_ring_buffer_p2p.py [slot_MiB] [num_slots] [total_MiB]
+```
+
+Uses `cudaIpcGetMemHandle` / `cudaIpcOpenMemHandle`.
+
+### `ring_buffer_p2p` multi-process (cuMem / VMM)
+
+```bash
+torchrun --nproc_per_node=2 primitives/l20/python/run_ring_buffer_p2p_cumem.py [slot_MiB] [num_slots] [total_MiB]
+```
+
+Uses `cuMemCreate` / `cuMemExportToShareableHandle` (POSIX FD) / `cuMemImportFromShareableHandle` — the same path NCCL uses when `NCCL_CUMEM_ENABLE=1`. FDs are passed between processes via Unix domain sockets (`SCM_RIGHTS`).

@@ -108,9 +108,21 @@ Default parameters: 4 MiB slot, 4 ring slots, 256 MiB total transfer.
 | `cudaMemcpyPeerAsync` (Copy Engine) | 26.1 GB/s | Dedicated DMA hardware, no SM involvement |
 | SM remote read (`remote_memory_kernel`) | 12.7 GB/s | Kernel loads from peer, write local |
 | SM remote write (`remote_memory_kernel`) | 10.6 GB/s | Kernel loads local, stores to peer |
-| **ring_buffer_p2p_2node (this experiment)** | **11.7 GB/s** | SM remote write + flag sync overhead |
+| **ring_buffer_p2p_2node (this experiment)** | **~10.4 GB/s** | SM remote write + flag sync, steady state |
 
-The ~12 GB/s ceiling for a single thread block is inherent to SM-initiated remote access on this PCIe SYS topology. The SM's outstanding memory request limit bounds achievable bandwidth when latency is high (Little's Law).
+The ~10-11 GB/s ceiling for a single thread block is inherent to SM-initiated remote access on this PCIe SYS topology. The SM's outstanding memory request limit bounds achievable bandwidth when latency is high (Little's Law).
+
+### Multi-Process IPC Modes
+
+The ring buffer kernel is independent of how cross-process memory sharing is set up. All three modes achieve the same steady-state bandwidth:
+
+| Host Setup Mode | Mechanism | Steady-state BW (2 GiB) |
+|-----------------|-----------|--------------------------|
+| Single process (direct peer access) | `cudaDeviceEnablePeerAccess` | 10.2 GB/s |
+| Multi-process IPC | `cudaIpcGetMemHandle` / `cudaIpcOpenMemHandle` | 10.6 GB/s |
+| Multi-process cuMem (VMM) | `cuMemCreate` / `cuMemExportToShareableHandle` (POSIX FD) | 10.4 GB/s |
+
+Key insight: the host-side setup mode (IPC vs cuMem vs direct) does NOT affect data-plane bandwidth. The kernel is identical; only the address mapping mechanism differs. Small-transfer benchmarks may show variance due to startup overhead, but at sufficient data volume (>= 1 GiB) all modes converge.
 
 ## Why NCCL Achieves Higher Bandwidth
 

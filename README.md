@@ -109,8 +109,11 @@ cd nccl-study
 # Build everything and register Python paths (one-time setup)
 bash scripts/prepare_env.sh
 
-# Run multi-process ring buffer P2P experiment
+# Run multi-process ring buffer P2P experiment (legacy IPC)
 torchrun --nproc_per_node=2 primitives/l20/python/run_ring_buffer_p2p.py
+
+# Run multi-process ring buffer P2P experiment (cuMem VMM, CUDA 12+)
+torchrun --nproc_per_node=2 primitives/l20/python/run_ring_buffer_p2p_cumem.py
 ```
 
 ## Directory Structure
@@ -132,11 +135,13 @@ nccl-study/
 ├── gin/                    # Phase 5: GPU-initiated networking (TODO)
 ├── deepep/                 # Phase 6: expert parallelism (TODO)
 └── third-party/
+    ├── DeepEP/             # DeepEP source (submodule)
     └── nccl/               # NCCL source (submodule)
 ```
 
 ## Third-Party Dependencies
 
+- `third-party/DeepEP`: DeepEP, included as a Git submodule from `https://github.com/deepseek-ai/DeepEP.git`.
 - `third-party/nccl`: NVIDIA NCCL, included as a Git submodule from `https://github.com/NVIDIA/nccl.git`.
 
 To clone this repository with submodules:

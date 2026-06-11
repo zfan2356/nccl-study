@@ -32,7 +32,7 @@ echo "  pybind11 cmake dir: ${PYBIND11_DIR}"
 echo ""
 echo "[2/3] Building CUDA pybind11 modules..."
 
-echo "  Building launcher/ipc_utils..."
+echo "  Building launcher (ipc_utils + cumem_utils)..."
 cmake -S "${ROOT_DIR}/launcher" -B "${ROOT_DIR}/build/launcher" \
   -Dpybind11_DIR="${PYBIND11_DIR}" -Wno-dev --quiet 2>/dev/null
 cmake --build "${ROOT_DIR}/build/launcher" --quiet
@@ -63,6 +63,7 @@ echo "  Installed: ${PTH_FILE}"
 echo ""
 echo "=== Verifying imports ==="
 python3 -c "import ipc_utils; print('  ipc_utils: OK')"
+python3 -c "import cumem_utils; print('  cumem_utils: OK')"
 python3 -c "import ring_buffer_p2p_ipc; print('  ring_buffer_p2p_ipc: OK')"
 python3 -c "from launcher import init_dist; print('  launcher: OK')"
 
@@ -71,3 +72,4 @@ echo "=== Setup complete ==="
 echo ""
 echo "You can now run experiments:"
 echo "  torchrun --nproc_per_node=2 primitives/l20/python/run_ring_buffer_p2p.py"
+echo "  torchrun --nproc_per_node=2 primitives/l20/python/run_ring_buffer_p2p_cumem.py"

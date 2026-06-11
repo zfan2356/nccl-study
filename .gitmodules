@@ -1,3 +1,6 @@
 [submodule "third-party/nccl"]
 	path = third-party/nccl
 	url = https://github.com/NVIDIA/nccl.git
+[submodule "third-party/DeepEP"]
+	path = third-party/DeepEP
+	url = https://github.com/deepseek-ai/DeepEP.git

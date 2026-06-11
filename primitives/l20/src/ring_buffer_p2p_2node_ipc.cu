@@ -144,6 +144,11 @@ static void run_receiver(uintptr_t dst_buf, uintptr_t recv_buf,
   CHECK_CUDA(cudaGetLastError());
 }
 
+static void memset_buffer(uintptr_t ptr, size_t bytes) {
+  CHECK_CUDA(cudaMemset(reinterpret_cast<void*>(ptr), 0, bytes));
+  CHECK_CUDA(cudaDeviceSynchronize());
+}
+
 static bool verify(uintptr_t ptr, size_t count, uint32_t seed) {
   std::vector<uint32_t> host(count);
   CHECK_CUDA(cudaMemcpy(host.data(), reinterpret_cast<void*>(ptr),
@@ -167,5 +172,6 @@ PYBIND11_MODULE(ring_buffer_p2p_ipc, m) {
   m.def("fill_source", &fill_source, "Fill buffer with verification pattern");
   m.def("run_sender", &run_sender, "Launch sender kernel on current device");
   m.def("run_receiver", &run_receiver, "Launch receiver kernel on current device");
+  m.def("memset_buffer", &memset_buffer, "Zero out a device buffer");
   m.def("verify", &verify, "Verify destination buffer against expected pattern");
 }

@@ -77,11 +77,33 @@ def main():
     # Synchronize before launching kernels
     import torch.distributed as dist
     dist.barrier()
-    log(rank, "Starting kernels")
 
-    # Both ranks launch their kernel, then synchronize.
-    # Receiver must be launched first (it spin-waits on tail).
-    # We use dist.barrier() to ensure both processes are ready before launching.
+    # Warmup: run once to prime TLBs and page tables
+    warmup_slots = min(num_slots, total_slots)
+    log(rank, "Warmup...")
+    if rank == 0:
+        ring_buffer_p2p_ipc.run_sender(src_ptr, remote_recv_ptr, remote_tail_ptr, head_ptr,
+                                       slot_count, num_slots, warmup_slots)
+        ipc_utils.synchronize()
+    else:
+        ring_buffer_p2p_ipc.run_receiver(dst_ptr, recv_ptr, tail_ptr, remote_head_ptr,
+                                         slot_count, num_slots, warmup_slots)
+        ipc_utils.synchronize()
+
+    dist.barrier()
+
+    # Reset flags and buffers for timed run (each rank resets only its own local buffers)
+    if rank == 0:
+        ring_buffer_p2p_ipc.memset_buffer(head_ptr, 8)
+    else:
+        ring_buffer_p2p_ipc.memset_buffer(tail_ptr, 8)
+        ring_buffer_p2p_ipc.memset_buffer(recv_ptr, num_slots * slot_count * 4)
+        ring_buffer_p2p_ipc.memset_buffer(dst_ptr, total_count * 4)
+
+    dist.barrier()
+    log(rank, "Starting timed run")
+
+    # Timed run
     if rank == 0:
         start_evt = ipc_utils.create_event()
         stop_evt = ipc_utils.create_event()

@@ -20,3 +20,12 @@ set_target_properties(ipc_utils PROPERTIES
   CUDA_SEPARABLE_COMPILATION OFF
   LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
 )
+
+find_library(CUDA_DRIVER_LIBRARY cuda REQUIRED)
+pybind11_add_module(cumem_utils src/cumem_utils.cu)
+target_include_directories(cumem_utils PRIVATE ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+target_link_libraries(cumem_utils PRIVATE ${CUDA_DRIVER_LIBRARY})
+set_target_properties(cumem_utils PROPERTIES
+  CUDA_SEPARABLE_COMPILATION OFF
+  LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
+)
